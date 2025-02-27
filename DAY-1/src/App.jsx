@@ -1,97 +1,91 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import 'remixicon/fonts/remixicon.css';
+import 'remixicon/fonts/remixicon.css'
 
 const App = () => {
+
   const [total, setTotal] = useState(0);
-  const [allProducts, setAllProducts] = useState([]);
+  const [data, setData] = useState([]);
   const [cartData, setCartData] = useState([]);
 
-  const btnClicked = async () => {
-    try {
-      const response = await axios.get('https://fakestoreapi.com/products');
-      setAllProducts(response.data);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    }
-  };
+  const fetchData = async () => {
+    const response = await axios.get('https://fakestoreapi.com/products');
+    setData(response.data);
+    console.log(response.data);
+  }
 
-  const AddToCart = (idx) => {
-    setCartData([...cartData, allProducts[idx]]);
-  };
+  const addToCart = (idx) => {
+    const copyCartData = [...cartData]
+    copyCartData.push(data[idx])
+    setCartData(copyCartData)
+  }
 
-  const DeleteFromCart = (idx) => {
-    setCartData(cartData.filter((_, index) => index !== idx));
-  };
+  const cartElementDelete = (idx) => {
+    const copyCartData = [...cartData]
+    copyCartData.splice(idx, 1)
+    setCartData(copyCartData)
+  }
 
-  useEffect(() => {
-    const totalAmount = cartData.reduce((sum, item) => sum + item.price, 0);
-    setTotal(totalAmount);
-  }, [cartData]);
+  const totalAmount = () => {
+    let sum = 0
+    cartData.forEach(function (elem) {
+      sum += elem.price
+    })
+    setTotal(sum)
+  }
+
+  useEffect(function () {
+    totalAmount()
+  }, [cartData])
+
 
   return (
-    <div className="min-h-screen bg-[#F0F0F0] p-6">
-      <div className="text-center">
-        <button
-          onClick={btnClicked}
-          className="bg-[#4682B4] text-white px-6 py-2 rounded-lg shadow-md hover:bg-[#5A738E] transition font-semibold"
-        >
-          Get Products
-        </button>
-      </div>
+    <div className='p-2'>
+      <button onClick={fetchData} className='bg-green-500 text-white px-4 py-2 rounded'>Get Product Data</button>
+      <div className='flex bg-blue-200 p-1'>
+        <div className='w-8/12 bg-blue-100 flex gap-2 p-1 flex-wrap'>
+          {data.map(function (elem, idx) {
 
-      <div className="flex gap-6 mt-6">
-        {/* Product Section */}
-        <div className="w-3/4 bg-white p-6 rounded-lg shadow-lg border border-gray-300">
-          <h2 className="text-2xl font-semibold text-[#4682B4] mb-4">Products</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {allProducts.map((elem, idx) => (
-              <div key={idx} className="bg-[#E0E6ED] p-4 rounded-lg shadow-md border border-gray-400">
-                <img className="h-32 w-full object-contain rounded-2xl" src={elem.image} alt={elem.title} />
-                <h3 className="text-lg font-semibold mt-2 text-[#2C3E50] truncate">{elem.title}</h3>
-                <h3 className="text-[#4682B4] font-bold">${elem.price.toFixed(2)}</h3>
-                <button
-                  onClick={() => AddToCart(idx)}
-                  className="bg-[#4682B4] text-white px-4 py-2 rounded-lg mt-2 hover:bg-[#5A738E] transition w-full font-semibold"
-                >
-                  Add to Cart
-                </button>
-              </div>
-            ))}
-          </div>
+            return <div key={idx} className='bg-white p-2 w-52 text-center rounded'>
+              <img className='h-20 mx-auto' src={elem.image} alt="" />
+
+              <h4>${elem.price}</h4>
+
+              <h2 className='h-12 overflow-hidden'>{elem.title}</h2>
+
+              <button
+                onClick={() => {
+                  addToCart(idx)
+                }}
+                className='active:scale-95 mt-2 bg-yellow-400 rounded px-4 py-2 text-white'>Add to Cart</button>
+
+            </div>
+          })}
         </div>
+        <div className='w-4/12 bg-blue-50 p-2'>
+          {cartData.map(function (elem, idx) {
 
-        {/* Cart Section */}
-        <div className="w-1/4 bg-white p-6 rounded-lg shadow-lg border border-gray-300 flex flex-col justify-between">
-          <h2 className="text-2xl font-semibold text-[#4682B4] mb-4">Shopping Cart</h2>
-          <div className="space-y-4 flex-grow">
-            {cartData.length === 0 ? (
-              <p className="text-gray-500 text-center">Your cart is empty</p>
-            ) : (
-              cartData.map((elem, idx) => (
-                <div key={idx} className="bg-[#E0E6ED] p-4 rounded-lg shadow-md border border-gray-400">
-                  <img className="h-20 w-full object-contain rounded-2xl" src={elem.image} alt={elem.title} />
-                  <h3 className="text-[#4682B4] font-bold mt-1">${elem.price.toFixed(2)}</h3>
-                  <button
-                    onClick={() => DeleteFromCart(idx)}
-                    className="bg-red-500 text-white px-4 py-1 rounded-lg mt-2 hover:bg-red-600 transition w-full"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Total Amount */}
-          <div className="mt-auto border-t border-gray-400 pt-4">
-            <h3 className="font-semibold text-[#2C3E50]">Total Items: {cartData.length}</h3>
-            <h3 className="font-bold text-lg text-[#4682B4]">Total Price: ${total.toFixed(2)}</h3>
-          </div>
+            return <div key={idx} className='bg-white items-center justify-between rounded p-2 flex gap-2'>
+              <img className='h-16' src={elem.image} alt="" />
+              <div>
+                <h2 className='text-sm'>{elem.title}</h2>
+                <h4>${elem.price}</h4>
+              </div>
+              <button onClick={() => {
+                cartElementDelete(idx)
+              }} className='active:scale-110  bg-red-500 px-2 py-1 text-xl rounded-full text-white'>
+                <i className=" ri-delete-bin-line"></i>
+              </button>
+            </div>
+          })}
+        </div>
+        <div className='w-80 bg-white p-4 text-xl flex justify-between fixed bottom-4 right-4'>
+          <h2>Total Amount - </h2>
+          <h3>${total}</h3>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default App;
+export default App
