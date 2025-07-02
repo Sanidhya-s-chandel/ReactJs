@@ -1,0 +1,13 @@
+.mainDiv{
+    background-color: rgb(169, 141, 141);
+    text-align: center;
+    border: 2px;
+    border-color: black;
+    border-radius: 30px;
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+}
